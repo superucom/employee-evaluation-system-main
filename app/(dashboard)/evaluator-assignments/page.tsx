@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Fragment, useState, useEffect, useMemo } from "react";
 import { getMainTeamName, extractNickname } from "@/lib/utils";
 
 interface EvaluatorAssignment {
@@ -21,6 +21,18 @@ interface EvaluatorAssignment {
   } | null;
   period: { id: string; name: string } | null;
   category: { id: string; name: string } | null;
+}
+
+interface EvaluatorAssignmentGroup {
+  id: string;
+  ids: string[];
+  evaluatorUser: EvaluatorAssignment["evaluatorUser"];
+  assignments: EvaluatorAssignment[];
+  typeLabels: string[];
+  categoryLabels: string[];
+  periodLabels: string[];
+  weightLabels: string[];
+  targetCount: number;
 }
 
 interface User {
@@ -101,6 +113,7 @@ export default function EvaluatorAssignmentsPage() {
   const [filterEvaluatorId, setFilterEvaluatorId] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
   const [filterCategoryId, setFilterCategoryId] = useState("");
+  const [expandedEvaluatorIds, setExpandedEvaluatorIds] = useState<Set<string>>(new Set());
 
   // One-Click Preset Package Modal
   const [showPackageModal, setShowPackageModal] = useState(false);
@@ -412,8 +425,8 @@ export default function EvaluatorAssignmentsPage() {
     }
   };
 
-  const handleDelete = async (ids: string[]) => {
-    if (!confirm(`คุณต้องการยกเลิกการมอบหมายนี้หรือไม่?`)) return;
+  const handleDelete = async (ids: string[], label = "รายการนี้") => {
+    if (!confirm(`คุณต้องการยกเลิก ${label} หรือไม่?`)) return;
 
     try {
       await Promise.all(
@@ -425,150 +438,93 @@ export default function EvaluatorAssignmentsPage() {
     }
   };
 
-  // Group assignments for display so whole-team assignments don't clutter the table into 10 separate rows
-  const groupedAssignments = useMemo(() => {
-    const map = new Map<string, {
-      id: string;
-      ids: string[];
-      evaluatorUser: EvaluatorAssignment["evaluatorUser"];
-      assignmentType: EvaluatorAssignment["assignmentType"];
-      mainTeamName?: string;
-      targetLabel: string;
-      includedDeptsText?: string;
-      deptCount?: number;
-      targetBadgeStyle: string;
-      category: EvaluatorAssignment["category"];
-      period: EvaluatorAssignment["period"];
-      source?: EvaluatorAssignment["source"];
-      weightPercentage: number;
-      includedDeptIds: Set<string>;
-    }>();
+  const getAssignmentTargetLabel = (assignment: EvaluatorAssignment) => {
+    if (assignment.assignmentType === "EMPLOYEE" && assignment.targetEmployee) {
+      return `${[assignment.targetEmployee.name, assignment.targetEmployee.nickname]
+        .filter(Boolean)
+        .join(" ")} (${assignment.targetEmployee.employeeCode})`;
+    }
+    if (assignment.assignmentType === "DEPARTMENT" && assignment.targetDepartment) {
+      return `แผนก: ${assignment.targetDepartment.name}`;
+    }
+    if (assignment.assignmentType === "TEAM" && assignment.targetTeam) {
+      const mainTeam = getMainTeamName(assignment.targetTeam);
+      const department = assignment.targetTeam.department?.name;
+      return `${mainTeam}${department ? ` — ${department}` : ""}`;
+    }
+    return "ไม่ระบุเป้าหมาย";
+  };
 
-    for (const a of assignments) {
-      if (a.assignmentType === "TEAM" && a.targetTeam) {
-        const mainTeamLabel = getMainTeamName(a.targetTeam);
-        const groupKey = `TEAM_${a.evaluatorUser?.id}_${mainTeamLabel}_${a.period?.id || "ALL"}_${a.category?.id || "ALL"}_${a.weightPercentage}`;
-        const deptId = a.targetTeam.department?.id;
+  const getAssignmentTypeLabel = (type: EvaluatorAssignment["assignmentType"]) => {
+    if (type === "EMPLOYEE") return "รายบุคคล";
+    if (type === "DEPARTMENT") return "ทั้งแผนก";
+    return "ทั้งทีมหลัก";
+  };
 
-        if (map.has(groupKey)) {
-          const item = map.get(groupKey)!;
-          item.ids.push(a.id);
-          if (deptId) item.includedDeptIds.add(deptId);
-        } else {
-          let badgeStyle = "bg-blue-500/15 text-blue-400 border-blue-500/30";
-          if (mainTeamLabel.includes("B")) badgeStyle = "bg-purple-500/15 text-purple-400 border-purple-500/30";
-          if (mainTeamLabel.includes("C")) badgeStyle = "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+  // Keep each database assignment intact, but show one summary row per evaluator.
+  const groupedAssignments = useMemo<EvaluatorAssignmentGroup[]>(() => {
+    const map = new Map<string, EvaluatorAssignment[]>();
 
-          const includedSet = new Set<string>();
-          if (deptId) includedSet.add(deptId);
-
-          map.set(groupKey, {
-            id: a.id,
-            ids: [a.id],
-            evaluatorUser: a.evaluatorUser,
-            assignmentType: "TEAM",
-            mainTeamName: mainTeamLabel,
-            targetLabel: `${mainTeamLabel}`,
-            targetBadgeStyle: badgeStyle,
-            category: a.category,
-            period: a.period,
-            source: a.source,
-            weightPercentage: a.weightPercentage,
-            includedDeptIds: includedSet,
-          });
-        }
-      } else if (a.assignmentType === "DEPARTMENT" && a.targetDepartment) {
-        const groupKey = `DEPT_${a.id}`;
-        map.set(groupKey, {
-          id: a.id,
-          ids: [a.id],
-          evaluatorUser: a.evaluatorUser,
-          assignmentType: "DEPARTMENT",
-          targetLabel: `แผนก: ${a.targetDepartment.name}`,
-          targetBadgeStyle: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-          category: a.category,
-          period: a.period,
-          source: a.source,
-          weightPercentage: a.weightPercentage,
-          includedDeptIds: new Set(),
-        });
-      } else if (a.assignmentType === "EMPLOYEE" && a.targetEmployee) {
-        const groupKey = `EMP_${a.id}`;
-        map.set(groupKey, {
-          id: a.id,
-          ids: [a.id],
-          evaluatorUser: a.evaluatorUser,
-          assignmentType: "EMPLOYEE",
-          targetLabel: `${[a.targetEmployee.name, a.targetEmployee.nickname].filter(Boolean).join(" ")} (${a.targetEmployee.employeeCode})`,
-          targetBadgeStyle: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-          category: a.category,
-          period: a.period,
-          source: a.source,
-          weightPercentage: a.weightPercentage,
-          includedDeptIds: new Set(),
-        });
-      }
+    for (const assignment of assignments) {
+      const evaluatorId = assignment.evaluatorUser?.id || `unknown-${assignment.id}`;
+      const current = map.get(evaluatorId) || [];
+      current.push(assignment);
+      map.set(evaluatorId, current);
     }
 
-    // Enrich team items with included dept info
-    return Array.from(map.values()).map((item) => {
-      if (item.assignmentType === "TEAM" && item.mainTeamName) {
-        const totalDepts = departments.length || 10;
-        const incCount = item.includedDeptIds.size || item.ids.length;
+    return Array.from(map.entries()).map(([evaluatorId, evaluatorAssignments]) => {
+      const unique = (values: string[]) => Array.from(new Set(values));
+      const weightLabels = unique(
+        evaluatorAssignments.map((assignment) => {
+          const points = (Number(assignment.weightPercentage) / 100) * 15;
+          const formattedPoints = Number.isInteger(points) ? points.toFixed(0) : points.toFixed(2).replace(/0+$/, "");
+          return `${formattedPoints} คะแนน`;
+        }),
+      );
 
-        if (incCount < totalDepts && departments.length > 0) {
-          const included = departments.filter((d) => item.includedDeptIds.has(d.id));
-          return {
-            ...item,
-            deptCount: incCount,
-            targetLabel: `${item.mainTeamName} (${incCount} แผนก)`,
-            includedDeptsText: included.map((d) => d.name).join(", "),
-          };
-        }
-        return {
-          ...item,
-          deptCount: totalDepts,
-          targetLabel: `ทั้ง${item.mainTeamName} (ครบทุกแผนก)`,
-          includedDeptsText: "ทุกแผนกในทีมนี้",
-        };
-      }
-      return item;
+      return {
+        id: evaluatorId,
+        ids: evaluatorAssignments.map((assignment) => assignment.id),
+        evaluatorUser: evaluatorAssignments[0].evaluatorUser,
+        assignments: evaluatorAssignments,
+        typeLabels: unique(evaluatorAssignments.map((assignment) => getAssignmentTypeLabel(assignment.assignmentType))),
+        categoryLabels: unique(evaluatorAssignments.map((assignment) => assignment.category?.name || "อัตโนมัติตามตำแหน่ง")),
+        periodLabels: unique(evaluatorAssignments.map((assignment) => assignment.period?.name || "ทุกรอบ")),
+        weightLabels,
+        targetCount: unique(evaluatorAssignments.map(getAssignmentTargetLabel)).length,
+      };
     });
-  }, [assignments, departments]);
+  }, [assignments]);
 
   const filteredGroupedAssignments = useMemo(() => {
-    return groupedAssignments.filter((a) => {
-      if (filterEvaluatorId && a.evaluatorUser.id !== filterEvaluatorId) {
-        return false;
-      }
-      if (filterType !== "ALL" && a.assignmentType !== filterType) {
-        return false;
-      }
-      if (filterCategoryId) {
-        if (!a.category || a.category.id !== filterCategoryId) {
-          return false;
-        }
-      }
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const evalName = (a.evaluatorUser.fullName || "").toLowerCase();
-        const evalUsername = (a.evaluatorUser.username || "").toLowerCase();
-        const targetLabel = (a.targetLabel || "").toLowerCase();
-        const includedDepts = (a.includedDeptsText || "").toLowerCase();
-        const catName = (a.category?.name || "").toLowerCase();
-        const periodName = (a.period?.name || "").toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
 
-        const isMatch =
-          evalName.includes(q) ||
-          evalUsername.includes(q) ||
-          targetLabel.includes(q) ||
-          includedDepts.includes(q) ||
-          catName.includes(q) ||
-          periodName.includes(q);
+    return groupedAssignments.filter((group) => {
+      if (filterEvaluatorId && group.evaluatorUser.id !== filterEvaluatorId) return false;
 
-        if (!isMatch) return false;
-      }
-      return true;
+      const matchesAssignment = (assignment: EvaluatorAssignment) => {
+        if (filterType !== "ALL" && assignment.assignmentType !== filterType) return false;
+        if (filterCategoryId && assignment.category?.id !== filterCategoryId) return false;
+        if (!query) return true;
+
+        const searchableText = [
+          group.evaluatorUser.fullName,
+          group.evaluatorUser.username,
+          getAssignmentTargetLabel(assignment),
+          assignment.targetDepartment?.name,
+          assignment.targetTeam?.name,
+          assignment.targetTeam?.department?.name,
+          assignment.category?.name,
+          assignment.period?.name,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(query);
+      };
+
+      return group.assignments.some(matchesAssignment);
     });
   }, [groupedAssignments, filterEvaluatorId, filterType, filterCategoryId, searchQuery]);
 
@@ -769,7 +725,7 @@ export default function EvaluatorAssignmentsPage() {
         {/* Count summary bar */}
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/50">
           <span>
-            แสดง <b className="text-primary font-bold">{filteredGroupedAssignments.length}</b> รายการ (จากทั้งหมด {groupedAssignments.length} กลุ่มสิทธิ์ / {assignments.length} สิทธิ์ย่อย)
+            แสดง <b className="text-primary font-bold">{filteredGroupedAssignments.length}</b> ผู้ประเมิน (จากทั้งหมด {groupedAssignments.length} คน / {assignments.length} สิทธิ์ย่อย)
           </span>
           {(searchQuery || filterEvaluatorId || filterType !== "ALL" || filterCategoryId) && (
             <span className="text-amber-400 font-semibold flex items-center gap-1">
@@ -785,11 +741,11 @@ export default function EvaluatorAssignmentsPage() {
           <thead>
             <tr>
               <th>ผู้ประเมิน (Evaluator)</th>
-              <th>ประเภทการมอบหมาย</th>
-              <th>เป้าหมายที่ถูกประเมิน (Target)</th>
-              <th>หมวดหมู่คำถาม (Category)</th>
+              <th>สรุปการมอบหมาย</th>
+              <th>เป้าหมายที่ถูกประเมิน</th>
+              <th>หมวดหมู่คำถาม</th>
               <th>รอบการประเมิน</th>
-              <th>น้ำหนักคะแนน (จาก 15)</th>
+              <th>น้ำหนักคะแนน</th>
               <th className="text-right">จัดการ</th>
             </tr>
           </thead>
@@ -809,77 +765,140 @@ export default function EvaluatorAssignmentsPage() {
                 </td>
               </tr>
             ) : (
-              filteredGroupedAssignments.map((a) => (
-                <tr key={a.id} className="hover:bg-muted/40 transition-colors">
+              filteredGroupedAssignments.map((group) => {
+                const isExpanded = expandedEvaluatorIds.has(group.id);
+
+                return (
+                  <Fragment key={group.id}>
+                    <tr className="hover:bg-muted/40 transition-colors">
                   <td>
                     <div className="font-semibold text-foreground flex items-center gap-1.5">
-                      {a.evaluatorUser.fullName}
-                      {extractNickname(a.evaluatorUser.fullName) && (
+                      {group.evaluatorUser.fullName}
+                      {extractNickname(group.evaluatorUser.fullName) && (
                         <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold">
-                          {extractNickname(a.evaluatorUser.fullName)}
+                          {extractNickname(group.evaluatorUser.fullName)}
                         </span>
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground flex items-center gap-2">
-                      <span>@{a.evaluatorUser.username}</span>
-                      {a.source === "AUTO" && <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AUTO</span>}
-                    </div>
-                  </td>
-                  <td>
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-muted text-foreground">
-                      {a.assignmentType === "EMPLOYEE" && "รายบุคคล (Employee)"}
-                      {a.assignmentType === "DEPARTMENT" && "ทั้งแผนก (Department)"}
-                      {a.assignmentType === "TEAM" && "ทั้งทีมหลัก (Main Team)"}
-                    </span>
-                  </td>
-                  <td className="font-medium text-foreground">
-                    <div className="space-y-1.5">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${a.targetBadgeStyle}`}>
-                        {a.targetLabel}
-                      </span>
-                      {a.includedDeptsText && (
-                        <div className="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold">🎯 แผนกที่ประเมิน:</span>
-                          <span className="text-slate-300 font-normal">{a.includedDeptsText}</span>
-                        </div>
+                      <span>@{group.evaluatorUser.username}</span>
+                      {group.assignments.every((assignment) => assignment.source === "AUTO") && (
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AUTO</span>
                       )}
                     </div>
                   </td>
                   <td>
-                    {a.category ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold border border-primary/20">
-                        <span>📝</span> {a.category.name}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground italic">
-                        อัตโนมัติตามตำแหน่ง
-                      </span>
-                    )}
+                    <div className="space-y-1">
+                      <div className="font-bold text-foreground">{group.assignments.length} สิทธิ์ย่อย</div>
+                      <div className="flex flex-wrap gap-1">
+                        {group.typeLabels.map((label) => (
+                          <span key={label} className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-muted text-foreground">
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </td>
-                  <td className="text-sm text-muted-foreground">{a.period?.name || "ทุกรอบ"}</td>
+                  <td className="font-medium text-foreground">
+                    <div>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border border-primary/20 bg-primary/10 text-primary">
+                        {group.targetCount} เป้าหมาย
+                      </span>
+                      <div className="text-[11px] text-muted-foreground mt-1">กด “ดูรายละเอียด” เพื่อดูรายชื่อ</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex flex-wrap gap-1">
+                      {group.categoryLabels.map((label) => (
+                        <span key={label} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-semibold border border-primary/20">
+                          <span>📝</span> {label}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="text-sm text-muted-foreground">
+                    {group.periodLabels.length === 1 ? group.periodLabels[0] : `${group.periodLabels.length} รอบ`}
+                  </td>
                   <td>
                     <div className="flex flex-col items-start gap-0.5">
-                      <span className="font-black text-primary text-base">
-                        {(Number(a.weightPercentage) / 100 * 15 % 1 === 0
-                          ? (Number(a.weightPercentage) / 100 * 15).toFixed(0)
-                          : (Number(a.weightPercentage) / 100 * 15).toFixed(1)
-                        )} <span className="text-sm font-semibold text-muted-foreground">/ 15 คะแนน</span>
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        ({Number(a.weightPercentage).toFixed(1)}%)
-                      </span>
+                      <span className="font-black text-primary text-sm">{group.weightLabels.length === 1 ? group.weightLabels[0] : `${group.weightLabels.length} แบบ`}</span>
+                      {group.weightLabels.length > 1 && <span className="text-[10px] text-muted-foreground">{group.weightLabels.join(" / ")}</span>}
                     </div>
                   </td>
                   <td className="text-right">
                     <button
-                      onClick={() => handleDelete(a.ids)}
-                      className="px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      onClick={() => setExpandedEvaluatorIds((current) => {
+                        const next = new Set(current);
+                        if (next.has(group.id)) next.delete(group.id);
+                        else next.add(group.id);
+                        return next;
+                      })}
+                      className="px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors"
                     >
-                      ยกเลิก
+                      {isExpanded ? "ซ่อนรายละเอียด" : "ดูรายละเอียด"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(group.ids, `${group.evaluatorUser.fullName} (${group.targetCount} สิทธิ์ย่อย)`)}
+                      className="ml-2 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    >
+                      ยกเลิกทั้งหมด
                     </button>
                   </td>
-                </tr>
-              ))
+                    </tr>
+                    {isExpanded && (
+                      <tr className="bg-muted/20">
+                        <td colSpan={7} className="p-0">
+                          <div className="p-4 border-y border-border/60">
+                            <div className="flex items-center justify-between gap-3 mb-3">
+                              <div className="text-sm font-bold text-foreground">รายละเอียดสิทธิ์ของ {group.evaluatorUser.fullName}</div>
+                              <div className="text-xs text-muted-foreground">ทั้งหมด {group.assignments.length} รายการ</div>
+                            </div>
+                            <div className="overflow-x-auto rounded-xl border border-border/70">
+                              <table className="w-full text-xs min-w-[900px]">
+                                <thead className="bg-background/70">
+                                  <tr>
+                                    <th className="text-left p-2.5">ประเภท</th>
+                                    <th className="text-left p-2.5">เป้าหมาย</th>
+                                    <th className="text-left p-2.5">หมวดหมู่</th>
+                                    <th className="text-left p-2.5">รอบ</th>
+                                    <th className="text-left p-2.5">น้ำหนัก</th>
+                                    <th className="text-left p-2.5">แหล่งที่มา</th>
+                                    <th className="text-right p-2.5">จัดการ</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {group.assignments.map((assignment) => {
+                                    const points = (Number(assignment.weightPercentage) / 100) * 15;
+                                    const formattedPoints = Number.isInteger(points) ? points.toFixed(0) : points.toFixed(2).replace(/0+$/, "");
+                                    return (
+                                      <tr key={assignment.id} className="border-t border-border/50">
+                                        <td className="p-2.5 font-semibold">{getAssignmentTypeLabel(assignment.assignmentType)}</td>
+                                        <td className="p-2.5 font-medium">{getAssignmentTargetLabel(assignment)}</td>
+                                        <td className="p-2.5">{assignment.category?.name || "อัตโนมัติตามตำแหน่ง"}</td>
+                                        <td className="p-2.5">{assignment.period?.name || "ทุกรอบ"}</td>
+                                        <td className="p-2.5 font-bold text-primary">{formattedPoints} / 15 ({Number(assignment.weightPercentage).toFixed(1)}%)</td>
+                                        <td className="p-2.5">{assignment.source || "MANUAL"}</td>
+                                        <td className="p-2.5 text-right">
+                                          <button
+                                            onClick={() => handleDelete([assignment.id], getAssignmentTargetLabel(assignment))}
+                                            className="px-2.5 py-1 text-red-400 hover:bg-red-500/10 rounded-lg font-semibold"
+                                          >
+                                            ยกเลิก
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })
             )}
           </tbody>
         </table>
