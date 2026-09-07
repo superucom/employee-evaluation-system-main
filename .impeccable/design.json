@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T18:33:48.6998015+07:00",
+  "title": "Design System: Employee Performance Evaluation System",
+  "extensions": {
+    "colorMeta": {
+      "quiet-sage": {
+        "role": "primary",
+        "displayName": "Quiet Sage",
+        "canonical": "#5D786C",
+        "tonalRamp": ["#1F332A", "#2F4A3E", "#3F6151", "#507363", "#5D786C", "#789387", "#A6BBB0", "#E2ECE7"]
+      },
+      "quiet-sage-hover": {
+        "role": "primary-hover",
+        "displayName": "Quiet Sage Hover",
+        "canonical": "#477A61",
+        "tonalRamp": ["#1D3828", "#28523A", "#356A4C", "#407457", "#477A61", "#6B9B7F", "#A2C1AE", "#E1EEE5"]
+      },
+      "sage-accent": {
+        "role": "secondary",
+        "displayName": "Sage Accent",
+        "canonical": "#91A99E",
+        "tonalRamp": ["#34483F", "#4E675A", "#6B8778", "#829E90", "#91A99E", "#B0C2B9", "#D0DED7", "#ECF2EE"]
+      },
+      "soft-office-canvas": {
+        "role": "neutral",
+        "displayName": "Soft Office Canvas",
+        "canonical": "#F5F9F6",
+        "tonalRamp": ["#1F2A24", "#34443B", "#53645A", "#78877E", "#A3B1A9", "#C6D1CB", "#E2EAE5", "#F5F9F6"]
+      },
+      "surface-muted": {
+        "role": "neutral",
+        "displayName": "Surface Muted",
+        "canonical": "#EEF4F0",
+        "tonalRamp": ["#223028", "#3E5045", "#5D7165", "#819188", "#A5B5AB", "#C8D4CD", "#DEE8E1", "#EEF4F0"]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#202522", "#3B413D", "#5A615C", "#7A817D", "#9AA19D", "#BBC1BD", "#DDE1DE", "#FFFFFF"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "canonical": "#24352D",
+        "tonalRamp": ["#17251E", "#24352D", "#30483B", "#436052", "#607A6D", "#8EA499", "#C1D0C8", "#EFF4F1"]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary",
+        "canonical": "#5E7066",
+        "tonalRamp": ["#24352D", "#36483E", "#495C52", "#5E7066", "#7F9087", "#A9B7AF", "#D0D9D3", "#F0F4F1"]
+      },
+      "border-soft": {
+        "role": "neutral",
+        "displayName": "Border Soft",
+        "canonical": "#CFDDD5",
+        "tonalRamp": ["#35443C", "#56675E", "#788981", "#99AAA1", "#CFDDD5", "#DDE7E1", "#EAF1ED", "#F8FBF9"]
+      },
+      "success": {
+        "role": "success",
+        "displayName": "Success Sage",
+        "canonical": "#477A61",
+        "tonalRamp": ["#1D3828", "#28523A", "#356A4C", "#407457", "#477A61", "#6B9B7F", "#A2C1AE", "#E1EEE5"]
+      },
+      "warning": {
+        "role": "warning",
+        "displayName": "Muted Bronze Warning",
+        "canonical": "#8B642A",
+        "tonalRamp": ["#34230C", "#523912", "#6D4D1D", "#7B581F", "#8B642A", "#B28A4E", "#D6B982", "#F1E4C8"]
+      },
+      "info": {
+        "role": "info",
+        "displayName": "Sage Teal Info",
+        "canonical": "#557B78",
+        "tonalRamp": ["#1E3534", "#2F4D4B", "#3E6461", "#4B716E", "#557B78", "#789B98", "#AAC2C0", "#E2EFEE"]
+      },
+      "error": {
+        "role": "error",
+        "displayName": "Muted Red Error",
+        "canonical": "#B65353",
+        "tonalRamp": ["#471919", "#6B2525", "#8D3333", "#A54444", "#B65353", "#CB7777", "#E3AAAA", "#F8E6E6"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Prompt Display", "purpose": "Product-level titles and login identity." },
+      "headline": { "displayName": "Prompt Headline", "purpose": "Page headings and high-level dashboard sections." },
+      "body": { "displayName": "Prompt Body", "purpose": "Thai-first application copy, descriptions, forms, and table content." },
+      "label": { "displayName": "Prompt Label", "purpose": "Compact table headers, chips, badges, and metadata." }
+    },
+    "shadows": [
+      { "name": "card-resting", "value": "0 2px 10px rgba(0, 0, 0, 0.02)", "purpose": "Quiet separation for cards and grouped panels." },
+      { "name": "primary-action", "value": "0 6px 16px rgba(142, 165, 151, 0.3)", "purpose": "Soft lift under prominent buttons." },
+      { "name": "login-card", "value": "0 20px 45px rgba(142, 165, 151, 0.18), 0 0 0 1px #E6E0D2", "purpose": "Strongest elevation for the login surface." },
+      { "name": "sidebar-drawer", "value": "12px 0 30px rgba(36, 53, 45, 0.16)", "purpose": "Separation for the mobile navigation drawer." }
+    ],
+    "motion": [
+      { "name": "standard", "value": "all 0.15s ease", "purpose": "Short, calm state transitions for controls." },
+      { "name": "card", "value": "all 0.2s ease", "purpose": "Subtle hover lift for stat and quick-action cards." },
+      { "name": "drawer", "value": "transform 0.2s ease, box-shadow 0.2s ease", "purpose": "Responsive sidebar open and close transition." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "640px" },
+      { "name": "desktop-drawer", "value": "1023px" },
+      { "name": "wide", "value": "1400px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action for saving, creating, syncing, or confirming an operational task.",
+      "html": "<button class=\"ds-btn-primary\">บันทึกข้อมูล</button>",
+      "css": ".ds-btn-primary { background: var(--primary); color: var(--primary-foreground); padding: 0.6rem 1.25rem; border: 0; border-radius: 0.75rem; font: 600 0.9rem/1.5 Prompt, system-ui, sans-serif; cursor: pointer; box-shadow: 0 6px 16px rgba(142,165,151,0.3); transition: all 0.15s ease; } .ds-btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(93,120,108,0.25); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A low-emphasis action that remains visible without competing with the primary action.",
+      "html": "<button class=\"ds-btn-secondary\">ยกเลิก</button>",
+      "css": ".ds-btn-secondary { background: var(--card); color: var(--foreground); padding: 0.6rem 1.25rem; border: 1.5px solid var(--input-border); border-radius: 0.75rem; font: 500 0.9rem/1.5 Prompt, system-ui, sans-serif; cursor: pointer; transition: all 0.15s ease; } .ds-btn-secondary:hover { background: var(--muted); border-color: var(--primary); } .ds-btn-secondary:focus-visible { outline: 3px solid rgba(93,120,108,0.25); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A clean, softly rounded field for search and form entry.",
+      "html": "<label class=\"ds-field-label\">ค้นหา<input class=\"ds-input\" placeholder=\"ค้นหาข้อมูล...\" /></label>",
+      "css": ".ds-field-label { display: grid; gap: 0.35rem; color: var(--foreground); font: 600 0.8rem/1.35 Prompt, system-ui, sans-serif; } .ds-input { width: 100%; background: var(--card); color: var(--foreground); border: 1.5px solid var(--input-border); border-radius: 0.6rem; padding: 0.6rem 0.85rem; font: 400 0.9rem/1.5 Prompt, system-ui, sans-serif; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input::placeholder { color: var(--text-secondary); opacity: 0.75; } .ds-input:focus-visible { border-color: var(--primary); outline: 0; box-shadow: 0 0 0 3px rgba(93,120,108,0.2); }"
+    },
+    {
+      "name": "Elevated Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The primary container for dashboard summaries, forms, filters, and report sections.",
+      "html": "<section class=\"ds-card\"><h3>สรุปผลการประเมิน</h3><p>ข้อมูลประจำรอบประเมิน</p></section>",
+      "css": ".ds-card { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); } .ds-card h3 { margin: 0; font: 600 1.125rem/1.4 Prompt, system-ui, sans-serif; } .ds-card p { margin: 0.5rem 0 0; color: var(--text-secondary); font: 400 0.9rem/1.5 Prompt, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Navigation Item",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "A sidebar item that keeps the operator oriented across the administration workspace.",
+      "html": "<a class=\"ds-nav-item ds-nav-item-active\" href=\"#\"><span aria-hidden=\"true\">▦</span><span>Dashboard</span></a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 0.6rem; min-height: 40px; padding: 0.6rem 0.75rem; border-radius: 0.75rem; color: var(--foreground); text-decoration: none; font: 500 0.9rem/1.5 Prompt, system-ui, sans-serif; transition: background 0.15s ease, color 0.15s ease; } .ds-nav-item:hover { background: rgba(220,233,225,0.72); } .ds-nav-item:focus-visible { outline: 3px solid rgba(93,120,108,0.25); outline-offset: 2px; } .ds-nav-item-active { background: rgba(220,233,225,0.9); color: var(--foreground); font-weight: 600; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "A compact semantic status marker for submitted, active, pending, informational, and error states.",
+      "html": "<span class=\"ds-chip ds-chip-success\">ส่งแล้ว</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font: 600 0.8rem/1.35 Prompt, system-ui, sans-serif; border: 1px solid var(--border); background: var(--muted); color: var(--text-secondary); } .ds-chip-success { background: rgba(71,122,97,0.14); color: #304F40; border-color: var(--success); } .ds-chip-warning { background: rgba(164,119,50,0.12); color: #805E20; border-color: var(--warning); } .ds-chip-error { background: rgba(182,83,83,0.1); color: var(--error); border-color: rgba(182,83,83,0.3); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Quiet Control Room",
+    "overview": "The interface is a quiet control room for a working organization: calm enough for long administrative sessions, structured enough for high-volume score and assignment data, and confident enough to make status and permissions easy to trust. The visual language is based on the confirmed Quiet Sage accent and Soft Office Canvas neutrals, with Prompt typography carrying Thai and English labels consistently across the product.\n\nThe system uses a soft elevated surface model. White cards sit gently above the pale Sage canvas, while thin borders and restrained shadows separate adjacent work areas without making the dashboard feel heavy. Color is functional: Sage is the operational voice, muted neutrals carry secondary information, and success, warning, information, and error retain distinct meanings.",
+    "keyCharacteristics": [
+      "Calm, professional Sage palette with high-contrast dark text.",
+      "Information-dense but orderly dashboard and table layouts.",
+      "Softly elevated cards and controls with restrained interaction feedback.",
+      "Thai-first product copy with English labels where they aid recognition.",
+      "Responsive desktop sidebar and mobile off-canvas navigation."
+    ],
+    "rules": [
+      { "name": "The Quiet Accent Rule", "body": "Use Quiet Sage to direct action and orientation; do not turn every decorative surface into an accent surface.", "section": "colors" },
+      { "name": "The Meaningful Status Rule", "body": "Status colors must remain distinct from the Sage brand accent so users can recognize success, warning, information, and error without relying on color alone.", "section": "colors" },
+      { "name": "The One Family Rule", "body": "Use Prompt consistently across Thai and English UI copy; create hierarchy with weight, size, and spacing rather than switching typefaces.", "section": "typography" },
+      { "name": "The Dense-but-Readable Rule", "body": "Compact labels are allowed in tables and badges, but important actions and page titles must retain comfortable line height and clear contrast.", "section": "typography" },
+      { "name": "The Soft Lift Rule", "body": "A control may lift slightly on hover, but the resting state should remain calm and grounded.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Quiet Sage as a deliberate action and orientation signal.",
+      "Do keep primary text dark and readable against Paper White, Soft Office Canvas, and Sage surfaces.",
+      "Do use soft elevation to separate work areas, not to decorate every element.",
+      "Do keep tables, filters, forms, and modal actions consistent across all administrative screens.",
+      "Do preserve the Thai-first copy and the English terms that help users identify system concepts.",
+      "Do keep mobile navigation and wide data panels independently scrollable."
+    ],
+    "donts": [
+      "Don't reintroduce unrelated saturated blue, purple, pink, or cyan as decorative brand colors.",
+      "Don't use low-contrast Sage text on pale Sage surfaces for important actions or values.",
+      "Don't make every card float with a large shadow or excessive motion.",
+      "Don't hide critical table identifiers or actions when adapting for small screens.",
+      "Don't change evaluation terminology, score meaning, permissions, or workflow behavior as a visual-only task."
+    ]
+  }
+}
