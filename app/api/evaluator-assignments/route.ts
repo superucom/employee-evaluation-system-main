@@ -35,9 +35,6 @@ export async function GET(req: NextRequest) {
             name: true,
             nickname: true,
             employeeCode: true,
-            position: true,
-            department: { select: { id: true, name: true, code: true } },
-            team: { select: { id: true, name: true, code: true } },
           },
         },
         targetDepartment: { select: { id: true, name: true } },
@@ -54,10 +51,6 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             name: true,
-            questions: {
-              select: { id: true, text: true, description: true, sortOrder: true },
-              orderBy: { sortOrder: "asc" },
-            },
           },
         },
       },

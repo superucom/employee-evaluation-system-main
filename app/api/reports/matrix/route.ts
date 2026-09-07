@@ -59,20 +59,22 @@ export async function GET(req: NextRequest) {
         status: "SUBMITTED",
         ...(departmentId && { employee: { departmentId } }),
       },
-      include: {
+      select: {
+        comment: true,
         employee: {
-          include: {
-            department: { select: { id: true, name: true } },
+          select: {
+            id: true,
+            employeeCode: true,
+            name: true,
+            nickname: true,
+            position: true,
+            department: { select: { id: true, name: true, code: true } },
             team: { select: { id: true, name: true, code: true } },
           },
         },
         evaluatorUser: { select: { id: true, fullName: true, username: true } },
         scores: {
-          include: {
-            question: {
-              include: { category: true },
-            },
-          },
+          select: { scoreValue: true },
         },
       },
     });

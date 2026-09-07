@@ -36,22 +36,33 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: [{ employee: { name: "asc" } }, { evalStartDate: "desc" }],
-        include: {
+        select: {
+          id: true,
+          employeeId: true,
+          evalStartDate: true,
+          evalEndDate: true,
+          workingDaysCount: true,
+          rawScore: true,
+          weightedScore: true,
+          finalPercentage: true,
+          workScore: true,
+          behaviorScore: true,
+          supervisorScore: true,
+          totalScore: true,
+          grade: true,
+          comment: true,
+          isOverride: true,
           employee: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              employeeCode: true,
               department: { select: { id: true, name: true } },
               team: { select: { id: true, name: true } },
             },
           },
-          evaluatorUser: { select: { id: true, fullName: true, username: true } },
+          evaluatorUser: { select: { id: true, fullName: true } },
           period: { select: { id: true, name: true } },
-          scores: {
-            include: {
-              question: {
-                include: { category: true },
-              },
-            },
-          },
         },
       }),
       prisma.evaluationRecord.count({ where }),

@@ -57,28 +57,55 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    // Index assignments once. The old implementation scanned every assignment
+    // for every employee, which becomes increasingly expensive as the roster
+    // and generated assignments grow.
+    const employeeAssignments = new Map<string, typeof assignments>();
+    const departmentAssignments = new Map<string, typeof assignments>();
+    const exactTeamAssignments = new Map<string, typeof assignments>();
+    const mainTeamDepartmentAssignments = new Map<string, typeof assignments>();
+
+    const addToIndex = (index: Map<string, typeof assignments>, key: string, assignment: (typeof assignments)[number]) => {
+      const bucket = index.get(key);
+      if (bucket) bucket.push(assignment);
+      else index.set(key, [assignment]);
+    };
+
+    for (const assignment of assignments) {
+      if (assignment.assignmentType === "EMPLOYEE" && assignment.targetEmployeeId) {
+        addToIndex(employeeAssignments, assignment.targetEmployeeId, assignment);
+      }
+      if (assignment.assignmentType === "DEPARTMENT" && assignment.targetDepartmentId) {
+        addToIndex(departmentAssignments, assignment.targetDepartmentId, assignment);
+      }
+      if (assignment.assignmentType === "TEAM" && assignment.targetTeam) {
+        addToIndex(exactTeamAssignments, assignment.targetTeam.id, assignment);
+        addToIndex(
+          mainTeamDepartmentAssignments,
+          `${getMainTeamName(assignment.targetTeam)}|${assignment.targetTeam.departmentId}`,
+          assignment,
+        );
+      }
+    }
+
     const completionData = employees.map((emp) => {
-      // Find expected assignments for this employee
+      // Find expected assignments for this employee using the pre-built indexes.
       const mainTeamLabel = emp.team ? getMainTeamName(emp.team) : "";
-      
+      const matchingAssignments = [
+        ...(employeeAssignments.get(emp.id) || []),
+        ...(departmentAssignments.get(emp.departmentId) || []),
+        ...(emp.teamId ? (exactTeamAssignments.get(emp.teamId) || []) : []),
+        ...(mainTeamLabel
+          ? (mainTeamDepartmentAssignments.get(`${mainTeamLabel}|${emp.departmentId}`) || [])
+          : []),
+      ].filter((assignment) =>
+        assignment.assignmentType !== "TEAM" || assignment.targetTeam?.departmentId === emp.departmentId
+      );
+
       const expectedEvaluatorsMap = new Map<string, { id: string; name: string; weight: number }>();
 
-      for (const a of assignments) {
-        let isMatch = false;
-        if (a.assignmentType === "EMPLOYEE" && a.targetEmployeeId === emp.id) {
-          isMatch = true;
-        } else if (a.assignmentType === "DEPARTMENT" && a.targetDepartmentId === emp.departmentId) {
-          isMatch = true;
-        } else if (a.assignmentType === "TEAM" && a.targetTeam) {
-          if (a.targetTeam.id === emp.teamId || (mainTeamLabel && getMainTeamName(a.targetTeam) === mainTeamLabel)) {
-            // Check if department matches
-            if (a.targetTeam.departmentId === emp.departmentId) {
-              isMatch = true;
-            }
-          }
-        }
-
-        if (isMatch && a.evaluatorUser) {
+      for (const a of matchingAssignments) {
+        if (a.evaluatorUser) {
           const evalId = a.evaluatorUser.id;
           const weightScore = (Number(a.weightPercentage) / 100) * 15;
           if (!expectedEvaluatorsMap.has(evalId)) {

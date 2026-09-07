@@ -105,7 +105,14 @@ export async function GET(req: NextRequest) {
 
     const allMatching = await prisma.employee.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        employeeCode: true,
+        name: true,
+        nickname: true,
+        position: true,
+        startDate: true,
+        status: true,
         department: { select: { id: true, name: true } },
         team: { select: { id: true, name: true, code: true } },
       },

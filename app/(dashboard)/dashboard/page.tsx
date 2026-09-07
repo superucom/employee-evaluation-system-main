@@ -39,11 +39,22 @@ async function ManagerDashboard({ userId }: { userId: string }) {
   const mainTeamNames = new Set(activeTeams.map((t) => getMainTeamName(t)));
   const totalMainTeams = mainTeamNames.size;
 
-  // Completion rate: submitted vs total active assignments (expected evaluations)
-  // Use submitted evaluations vs total evaluations in the active period (submitted + draft)
-  const totalEvaluations = await prisma.evaluationRecord.count({
-    where: activePeriod ? { periodId: activePeriod.id } : undefined,
-  });
+  // Fetch the remaining dashboard data together so the second database round-trip
+  // does not wait for the recent-evaluations query to finish.
+  const [totalEvaluations, recent] = await Promise.all([
+    prisma.evaluationRecord.count({
+      where: activePeriod ? { periodId: activePeriod.id } : undefined,
+    }),
+    prisma.evaluationRecord.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: {
+        employee: { select: { name: true, employeeCode: true } },
+        evaluatorUser: { select: { fullName: true } },
+        period: { select: { name: true } },
+      },
+    }),
+  ]);
   const completionRate = totalEvaluations > 0 ? (submittedEvaluations / totalEvaluations) * 100 : 0;
 
   const stats = [
@@ -61,16 +72,6 @@ async function ManagerDashboard({ userId }: { userId: string }) {
     { label: "ดูรายงาน", href: "/reports/performance", icon: "📊", desc: "รายงานผลการประเมิน" },
     { label: "Audit Log", href: "/audit-logs", icon: "🔍", desc: "ประวัติการดำเนินการ" },
   ];
-
-  const recent = await prisma.evaluationRecord.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 8,
-    include: {
-      employee: { select: { name: true, employeeCode: true } },
-      evaluatorUser: { select: { fullName: true } },
-      period: { select: { name: true } },
-    },
-  });
 
   const recentRows = recent.map((r) => ({
     id: r.id,
@@ -177,24 +178,25 @@ async function ManagerDashboard({ userId }: { userId: string }) {
 async function EvaluatorDashboard({ userId, userName }: { userId: string; userName: string }) {
   const activePeriod = await prisma.evaluationPeriod.findFirst({ where: { status: "ACTIVE" } });
 
-  const myEvaluations = activePeriod
-    ? await prisma.evaluationRecord.findMany({
-        where: { evaluatorUserId: userId, periodId: activePeriod.id },
-        include: { employee: { select: { id: true, name: true, employeeCode: true } } },
-        orderBy: { evalStartDate: "desc" },
-        take: 5,
-      })
-    : [];
-
-  const assignments = await prisma.evaluatorAssignment.findMany({
-    where: { evaluatorUserId: userId, isActive: true },
-    include: {
-      targetEmployee: { select: { id: true, name: true } },
-      targetDepartment: { select: { id: true, name: true } },
-      targetTeam: { select: { id: true, name: true } },
-    },
-    take: 10,
-  });
+  const [myEvaluations, assignments] = await Promise.all([
+    activePeriod
+      ? prisma.evaluationRecord.findMany({
+          where: { evaluatorUserId: userId, periodId: activePeriod.id },
+          include: { employee: { select: { id: true, name: true, employeeCode: true } } },
+          orderBy: { evalStartDate: "desc" },
+          take: 5,
+        })
+      : Promise.resolve([]),
+    prisma.evaluatorAssignment.findMany({
+      where: { evaluatorUserId: userId, isActive: true },
+      include: {
+        targetEmployee: { select: { id: true, name: true } },
+        targetDepartment: { select: { id: true, name: true } },
+        targetTeam: { select: { id: true, name: true } },
+      },
+      take: 10,
+    }),
+  ]);
 
   const submittedCount = myEvaluations.filter((e) => e.status === "SUBMITTED").length;
   const draftCount = myEvaluations.filter((e) => e.status === "DRAFT").length;
