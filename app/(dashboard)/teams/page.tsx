@@ -597,9 +597,9 @@ export default function TeamsAndDepartmentsPage() {
 
       {/* VIEW 1: 3 MAIN TEAMS VIEW */}
       {viewMode === "teams" && (
-        <div className={`flex gap-5 transition-all ${selectedDeptGroup ? "flex-row" : ""}`}>
+        <div className={`flex flex-col lg:flex-row gap-5 transition-all ${selectedDeptGroup ? "" : ""}`}>
           {/* Teams Grid */}
-          <div className={`transition-all ${selectedDeptGroup ? "w-[55%] min-w-0" : "w-full"}`}>
+          <div className={`transition-all min-w-0 ${selectedDeptGroup ? "w-full lg:w-[55%]" : "w-full"}`}>
             {loading ? (
               <div className="text-center py-16 text-muted-foreground">
                 <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-3" />
@@ -714,7 +714,7 @@ export default function TeamsAndDepartmentsPage() {
 
           {/* Employee List Side Panel */}
           {selectedDeptGroup && (
-            <div className="flex-1 min-w-0 bg-card border border-border rounded-2xl shadow-xl flex flex-col overflow-hidden" style={{ maxHeight: "calc(100vh - 180px)", minHeight: "450px" }}>
+            <div className="teams-employee-panel flex-1 min-w-0 bg-card border border-border rounded-2xl shadow-xl flex flex-col overflow-hidden" style={{ maxHeight: "calc(100vh - 180px)", minHeight: "450px" }}>
               {/* Panel Header */}
               <div className="p-4 border-b border-border bg-muted/50 flex items-center justify-between flex-shrink-0">
                 <div>

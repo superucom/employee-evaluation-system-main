@@ -687,7 +687,7 @@ export default function EvaluatorAssignmentsPage() {
       <div className="bg-card p-4 rounded-2xl border border-border space-y-3 shadow-sm">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[260px]">
+          <div className="relative flex-1 min-w-0 sm:min-w-[260px]">
             <input
               type="text"
               placeholder="🔍 ค้นหาชื่อผู้ประเมิน, @username, เป้าหมาย (ชื่อ/รหัส), แผนก, หรือหมวดหมู่..."

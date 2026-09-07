@@ -383,6 +383,7 @@ export default function Sidebar({ role }: { role: string }) {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setOpen(true)}
+        aria-label="เปิดเมนูนำทาง"
         style={{
           position: "fixed",
           top: "1rem",
@@ -406,6 +407,7 @@ export default function Sidebar({ role }: { role: string }) {
       {open && (
         <div
           onClick={() => setOpen(false)}
+          aria-hidden="true"
           style={{
             position: "fixed",
             inset: 0,
@@ -418,6 +420,7 @@ export default function Sidebar({ role }: { role: string }) {
 
       {/* Sidebar Container */}
       <aside
+        className={`dashboard-sidebar ${open ? "is-open" : ""}`}
         style={{
           width: "var(--sidebar-width)",
           minHeight: "100vh",
@@ -426,7 +429,7 @@ export default function Sidebar({ role }: { role: string }) {
           display: "flex",
           flexDirection: "column",
           position: "fixed",
-          left: open ? 0 : undefined,
+          left: 0,
           top: 0,
           bottom: 0,
           zIndex: 45,
@@ -437,6 +440,7 @@ export default function Sidebar({ role }: { role: string }) {
         {/* Mobile Close Button */}
         <button
           onClick={() => setOpen(false)}
+          aria-label="ปิดเมนูนำทาง"
           className="mobile-close-btn"
           style={{
             display: "none",

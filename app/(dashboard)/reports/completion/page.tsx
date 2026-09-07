@@ -221,7 +221,7 @@ export default function CompletionReportPage() {
           placeholder="ค้นหาชื่อ, รหัสพนักงาน หรือผู้ประเมิน..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] px-3 py-2 bg-background border border-input rounded-lg text-sm"
+          className="flex-1 min-w-0 sm:min-w-[200px] px-3 py-2 bg-background border border-input rounded-lg text-sm"
         />
       </div>
 
@@ -308,4 +308,3 @@ export default function CompletionReportPage() {
     </div>
   );
 }
-

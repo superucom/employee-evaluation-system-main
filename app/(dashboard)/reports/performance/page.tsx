@@ -395,7 +395,7 @@ export default function PerformanceReportPage() {
 
       {/* Filter Bar & View Toggle */}
       <div className="bg-card p-4 rounded-xl border border-border flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[300px]">
+        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0 sm:min-w-[300px]">
           <select
             value={periodFilter}
             onChange={(e) => setPeriodFilter(e.target.value)}
@@ -438,7 +438,7 @@ export default function PerformanceReportPage() {
             placeholder="ค้นหาชื่อ, รหัสพนักงาน หรือผู้ประเมิน..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-[200px] px-3 py-2 bg-background border border-input rounded-lg text-sm"
+            className="flex-1 min-w-0 sm:min-w-[200px] px-3 py-2 bg-background border border-input rounded-lg text-sm"
           />
         </div>
 

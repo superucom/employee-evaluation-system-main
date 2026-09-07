@@ -397,13 +397,16 @@ button[type="button"].border:hover {
 .main-content {
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+  min-width: 0;
+  width: calc(100% - var(--sidebar-width));
   background-color: #FAF8F3;
   color: #2C2621;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .main-content {
     margin-left: 0;
+    width: 100%;
   }
 }
 
@@ -527,6 +530,114 @@ body,
 .rounded-2xl.border {
   background-color: var(--card) !important;
   border-color: var(--border) !important;
+}
+
+/* =========================================================
+   RESPONSIVE DASHBOARD FOUNDATION
+   The desktop sidebar keeps its existing footprint. On smaller
+   screens it becomes an off-canvas drawer so content can use the
+   full viewport without introducing page-level horizontal scroll.
+   ========================================================= */
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dashboard-shell,
+.main-content,
+.dashboard-page-container {
+  max-width: 100%;
+}
+
+.dashboard-sidebar {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-menu-btn {
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (min-width: 1024px) {
+  .mobile-menu-btn,
+  .mobile-close-btn {
+    display: none !important;
+  }
+
+  .dashboard-sidebar {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-menu-btn {
+    display: inline-flex !important;
+  }
+
+  .dashboard-sidebar {
+    transform: translateX(-100%);
+    box-shadow: 12px 0 30px rgba(36, 53, 45, 0.16);
+  }
+
+  .dashboard-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .mobile-close-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    z-index: 2;
+  }
+
+  .dashboard-page-container {
+    overflow-x: clip;
+  }
+}
+
+/* Scoped overflow helpers: wide data stays scrollable inside its own
+   panel, while cards/forms remain fluid at narrow widths. */
+.main-content .overflow-x-auto {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.main-content table {
+  max-width: none;
+}
+
+@media (max-width: 639px) {
+  .main-content .fixed.inset-0 {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 0.75rem;
+  }
+
+  .main-content .fixed.inset-0 > [class*="max-w-"] {
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+    padding: 1rem;
+  }
+
+  .main-content .grid.grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .main-content button,
+  .main-content a[role="button"] {
+    min-height: 40px;
+  }
+
+  .teams-employee-panel {
+    max-height: calc(100dvh - 9rem) !important;
+    min-height: 320px !important;
+  }
 }
 
 .login-logo-box,

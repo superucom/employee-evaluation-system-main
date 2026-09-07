@@ -18,10 +18,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <SessionProvider session={session}>
-      <div className="flex">
+      <div className="dashboard-shell flex min-h-screen min-w-0">
         <Sidebar role={user.role} />
-        <main className="main-content flex-1">
-          <div className="p-6 md:p-8">{children}</div>
+        <main className="main-content min-w-0 w-full flex-1">
+          <div className="dashboard-page-container p-4 pt-16 sm:p-5 sm:pt-16 lg:p-8 lg:pt-8">{children}</div>
         </main>
       </div>
     </SessionProvider>
